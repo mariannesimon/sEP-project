@@ -1,51 +1,46 @@
 #!/usr/bin/python
 
-import os.path, sys, re, random
+import os.path, sys, re, random, numpy as np
 from Bio import SeqIO
 
-path = os.path.split(os.path.dirname(os.path.realpath(__file__)))
-elm_fname = sys.argv[1]
-seq_fname = sys.argv[2]
-out_name = sys.argv[3]
+# Set variables
+try:
+    elm_fname, seq_fname, out_name = sys.argv[1], sys.argv[2], sys.argv[3]
+except:
+    print "Problem with file names."
+N = 500
 
+# Shuffle sequence
 def shuffle(seq):
     s = ""
     return s.join(random.sample(seq,len(seq)))
 
-elm_original = False
-# Modify original file
-if elm_original:
-    outfile = open("%s/motifs_elm.txt" %path[0],"w")
-    with open("%s/data/elm_classes.tsv" %path[0],"r") as elmfile:
-        raw_data = elmfile.readlines()[6:]
-        for line in raw_data:
-            line = line.split("\t")
-            outfile.write("%s\t%s\t%s\n"%(line[4][1:-1],line[1][1:-1],line[5][1:-1]))
-    outfile.close()
-
 # Motif search
-outfile = open("%s/%s" %(path[0],out_name),"w")
-with open(elm_fname,"r") as elm_file:
-    elmlist = [elmline.split("\t") for elmline in elm_file.readlines()]
+with open(elm_fname,"r") as elm_file, open(out_name,"w") as outfile:
+    raw_elm = elm_file.readlines()[6:]
+    elmlist = [[line.split("\t")[i][1:-1] for i in range(8)] for line in raw_elm]
+    outfile.write("sPEP id\tsPEP length\tStart\tEnd\tMatch\tELM_ID\tPvalue\n")
+    # Read fasta file
     for spep in SeqIO.parse(seq_fname,"fasta"):
-        outfile.write("# %s\n# Start\tEnd\tMatch\tID\tPvalue\tProbability\n"%spep.id)
+        pval, allmatch = [], []
         for elm in elmlist:
-            matches = []
-            score = 0
-            for m in re.finditer(r"%s" %elm[0], str(spep.seq)):
-                score += 1
-                matches.append((m.start(),m.end(),m.group()))
-            if score>0:
-                pval = 0
-                for i in range(100):
+            matches = [(m.start(),m.end(),m.group(),elm[1]) for m in re.finditer(r"%s" %elm[4], str(spep.seq))]
+            # Pvalue estimation for the motif if found
+            if len(matches)>0:
+                allmatch.append(matches)
+                p = 0
+                i = 0
+                # Shuffle N times target sequence
+                while i<N:
                     num = 0
-                    seq = shuffle(str(spep.seq))
-                    for m in re.finditer(r"%s" %elm[0], seq):
+                    for m in re.finditer(r"%s" %elm[4], shuffle(str(spep.seq))):
                         num += 1
-                    pval += int(num>=score)
-                pval = pval/100.0
-                if pval<=0.1:
-                    for m in matches:
-                        outfile.write("\t\t%d\t%d\t%s\t%s\t%0.4f\t%s" \
-                        %(m[0],m[1],m[2],elm[1],pval,elm[2]))
-outfile.close()
+                    p += int(num>=len(matches))
+                    i += 1
+                pval.append(p/float(N))
+        # BH False discovery rate control
+        for i in np.argsort(pval):
+            if pval[i]<=(i+1)/float(len(pval))*0.05:
+                for j in allmatch[i]: # one line for each elm
+                    outfile.write("%s\t%d\t%d\t%d\t%s\t%s\t%0.4f\n" \
+                    %(spep.id,len(str(spep.seq)),j[0],j[1],j[2],j[3],pval[i]))
