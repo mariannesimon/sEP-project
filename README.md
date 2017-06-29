@@ -6,6 +6,7 @@ The following are required:
 - Pyfasta (Python 2.7)
 - Anchor
 - SignalP
+
 In the bash script, you should edit the paths to the Anchor and SignalP programs before running the pipeline.
 
 To run the pipeline, open a terminal and use :
