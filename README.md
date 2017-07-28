@@ -1,6 +1,6 @@
 # sPEP-project
 
-The bash script (pipeline.sh) will automatically run prediction softwares.
+The bash script (main.sh) will automatically run prediction softwares.
 The following are required:
 - Python 2.7
 - Pyfasta (Python 2.7)
