@@ -6,6 +6,7 @@ The following are required:
 - Pyfasta (Python 2.7)
 - Anchor
 - SignalP
+
 You also need an internet connection to get data predictions from CBS, Biomine and Jpred servers.
 
 In the bash script, you can edit the paths to the Anchor and SignalP programs before running the pipeline.
