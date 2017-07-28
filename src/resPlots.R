@@ -4,11 +4,11 @@ library(ade4)
 library(ggrepel)
 library(grid)
 library(gridExtra)
-args <- commandArgs(trailingOnly = F)
+args <- commandArgs(trailingOnly = T)
 
 # If not used on command line, modify the following line
-# args <- c('~/Documents/Slavoff_sPEP/ALL','~/Documents/Slavoff_sPEP/ALL/sEP_table.csv',
-#           '~/Documents/Slavoff_sPEP/data/aaproperties.tsv')
+args <- c('~/Documents/Slavoff_sPEP/ALL','~/Documents/Slavoff_sPEP/ALL/sEP_table.csv',
+          '~/Documents/Slavoff_sPEP/data/aaproperties.tsv')
 
 ###############################################################################################
 #     Open files
@@ -38,6 +38,7 @@ file$Start.codon[file$Start.codon==' ' | file$Start.codon=='None' | is.na(file$S
 
 f <- file[substr(file$sPEP.id,1,3)!='SEP',]
 human <- file[file$Organism=='Human',]
+cf <- file[file$AA!='',]
 
 # ProtParam file
 prot <- as.data.frame(read.table(paste(args[1],"protParams.tsv",sep="/"),sep="\t",h=T))
@@ -53,7 +54,7 @@ colnames(anchor) <- c('number', 'aa', 'anchorp', 'output', 'iupred', 'score', 'S
 
 # Motif file
 motifs <- data.frame(read.table(paste(args[1],"Motifs.tsv",sep='/'),sep='\t',h=T))
-nmotifs <- sapply(file$sPEP.id, function(name) { return(length(motifs[motifs$sPEP.id==as.character(name),1]))})
+nmotifs <- sapply(file[file$AA!='',]$sPEP.id, function(name) { return(length(motifs[motifs$sPEP.id==as.character(name),1]))})
 
 # AA properties file
 aa <- as.data.frame(read.table(args[3],sep=',',h=T))
@@ -243,7 +244,7 @@ quartz.save(file=paste(args[1],"Rplots/FCA2.pdf",sep='/'),type="pdf",device=dev.
 plotfca(afc, vec, aa$class, 'Class', 'Origin')
 quartz.save(file=paste(args[1],"Rplots/FCA3.pdf",sep='/'),type="pdf",device=dev.cur())
 
-scatterafc <- function(afc, fac) {
+scatterafc <- function(afc, fac, nc, nr) {
   Z <- gravity(fac, afc)
   pl <- lapply(1:length(levels(fac)), function(i) {
     ggplot(data=afc$li[Z$f==levels(fac)[i],]) +
@@ -255,24 +256,36 @@ scatterafc <- function(afc, fac) {
       scale_color_discrete(name='Origin',h=c(exp(i),255))
   })
   grid.arrange(rectGrob())
-  marrangeGrob(pl,ncol=3,nrow=3)
+  marrangeGrob(pl,ncol=nc,nrow=nr)
 }
-scatterafc(afc, file[match(prot$id,file$sPEP.id),]$Annotation)
+scatterafc(afc, file[match(prot$id,file$sPEP.id),]$Annotation, 3, 3)
+quartz.save(file=paste(args[1],"Rplots/FCA4.pdf",sep='/'),type="pdf",device=dev.cur())
+
 
 # Clustering with kmeans
 
-# cluster <- kmeans(as.matrix(cbind(out[,2:4],prot[,6:25])), 2)
-# cluster$size
-# quartz(bg='white')
-# p1 <- ggplot(data=afc$li) +
-#   geom_vline(xintercept=0, alpha=0.5) + geom_hline(yintercept=0, alpha=0.5) +
-#   geom_point(aes(x=Axis1,y=Axis2,color=as.factor(cluster$cluster))) +
-#   xlim(-1,1) + labs(title='sEPs coordinates on FCA axis') 
-# p2 <- ggplot(data=afc$li) +
-#   geom_vline(xintercept=0, alpha=0.5) + geom_hline(yintercept=0, alpha=0.5) +
-#   geom_point(aes(x=Axis1,y=Axis2,color=as.factor(prot$ori))) +
-#   xlim(-1,1) + labs(title='sEPs coordinates on FCA axis')
-# grid.arrange(p1,p2,ncol=1)
+cluster1 <- kmeans(as.matrix(cbind(out[,2:4],prot[,6:25])), 2)
+cluster1$size
+
+mat <- matrix(cbind(mdis,as.numeric(cf$Annotation), as.numeric(cf$Subcellular.loc.), 
+                    as.numeric(cf$Signal.Peptide)),ncol=4)
+cluster2 <- kmeans(mat,2)
+comp <- as.numeric(cf$Origin)
+
+quartz(bg='white')
+p1 <- ggplot(data=afc$li) +
+  geom_vline(xintercept=0, alpha=0.5) + geom_hline(yintercept=0, alpha=0.5) +
+  geom_point(aes(x=Axis1,y=Axis2,color=as.factor(2-cluster2$cluster+1))) +
+  scale_color_discrete(name='Cluster',labels=c(1,2)) +
+  # geom_text_repel(data=afc$li[(3-cluster2$cluster)!=comp,], aes(x=Axis1,y=Axis2,label=cf[(3-cluster2$cluster)!=comp,1])) +
+  xlim(-1,1) + labs(title='sEPs coordinates on FCA axis')
+p2 <- ggplot(data=afc$li) +
+  geom_vline(xintercept=0, alpha=0.5) + geom_hline(yintercept=0, alpha=0.5) +
+  geom_point(aes(x=Axis1,y=Axis2,color=as.factor(prot$ori))) +
+  xlim(-1,1) + labs(title='sEPs coordinates on FCA axis')
+grid.arrange(p1,p2,ncol=1)
+
+
 
 # Subcellular localization
 
@@ -283,8 +296,8 @@ scatterafc(afc, file[match(prot$id,file$sPEP.id),]$Annotation)
 
 quartz(bg='white')
 ggplot(data=human) + 
-  geom_bar(aes(Subcellular.loc., fill=Origin,y=..count../sum(..count..)),position=position_dodge()) +
-  ylim(0,0.6) + labs(title='Subcellular localization prediction', y='Proportion of peptides')
+  geom_bar(aes(Subcellular.loc., fill=Origin,y=..count..),position=position_dodge()) +
+  labs(title='Subcellular localization prediction', y='Number of peptides')
 quartz.save(file=paste(args[1],"Rplots/Subcellular_loc.pdf",sep='/'),type="pdf",device=dev.cur())
 
 

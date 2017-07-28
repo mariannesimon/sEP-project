@@ -1,8 +1,8 @@
-#!/usr/bin/env perl
+#!/usr/bin/env perl 
 use strict;
 use warnings;
 
-# Author: Alexey Drozdetskiy
+# Author: Alexey Drozdetskiy 
 # Email: a.drozdetskiy@dundee.ac.uk
 # ---
 # Dr. Alexey Drozdetskiy
@@ -15,8 +15,8 @@ use warnings;
 # www.compbio.dundee.ac.uk
 # The University of Dundee is registered Scottish charity: No.SC015096
 
-# Please contact me with suggestions to improve/fix client/server part of the JPred API.
-# Do not assume it's OK to modify the API and to try your version on live JPred installation.
+# Please contact me with suggestions to improve/fix client/server part of the JPred API. 
+# Do not assume it's OK to modify the API and to try your version on live JPred installation. 
 # Users abusing JPred servers effectively preventing others from using the service will be banned.
 
 # For documentation: run jpredapi without arguments like so: 'perl jpredapi'
@@ -43,8 +43,8 @@ sub subcommand($$) {
 # A shortcut for outputting errors
 sub barf($) {
     my $response = shift;
-    # my ($message) = $response->content =~ m{<p>([^<]+)</p>};
-    die "jpredapi error\n";
+    my ($message) = $response->content =~ m{<p>([^<]+)</p>};
+    die "ERROR: $message\n";
 }
 
 my $ua = LWP::UserAgent->new;
@@ -76,16 +76,16 @@ sub doc {
 
     JPred RESTful API client v.1.5 documentation.
 
-    General:
+    General: 
 	please note that jobs run through this client program will be submitted to the JPred 4 server:
         http://www.compbio.dundee.ac.uk/jpred4
 
     A tutorial about the JPred API is available at:
         http://www.compbio.dundee.ac.uk/jpred4/api.shtml
 
-    Email:
+    Email: 
 	Usage of your email address is optional on single sequence job submission, but if you use one  - you will be
-	notified when the job is complete or sent some diagnostics if it crashed. Email is obligatory for batch job submission.
+	notified when the job is complete or sent some diagnostics if it crashed. Email is obligatory for batch job submission. 
 	Results from batch submissions are sent by email and link to individual job results and to an archive containing ALL results.
 	If you use email for your submissions we may ocassionaly contact you about major updates to the JPred server and JPred API.
 
@@ -97,36 +97,36 @@ sub doc {
 
 
   2.
-    To submit a JPred job do:
+    To submit a JPred job do:	
        'perl jpredapi submit file=filename mode=batch format=fasta email=name\@domain.com name=my_test_job skipPDB=on'
     or
        'perl jpredapi submit mode=single format=raw email=name\@domain.com name=my_test_job skipPDB=on seq=MQVWPIEGIKKFETLSYLPPLTVEDLLKQIEYLLRSKWVPCLEFSKVGFVYRENHRSPGYYDGRYWTMWKLPMFGCTDATQVLKELEEAKKAYPDAFVRIIGFDNVRQVQLISFIAYKPPGC'
     where:
        'file=filename' - filename is the name of a file with the job input, see example_submission_sequence.txt (file name/suffix could be any, e.g. it does not have to be something like name.fasta for FASTA format file)
        'seq=AAAABBB' - instead of passing input file, for one-sequence submission you can submit jobs with sequences passed right through command line
-       'format=batch' - defines format. Possible values are:
+       'format=batch' - defines format. Possible values are: 
           - batch (multiple sequence submission, file in FASTA format)
           - seq (single sequence submission in raw/FASTA format)
           - or multiple sequence submission formats: msf, blc, fasta
        'email=name\@domain.com' - defines email address where job report will be sent (optional for all but batch submissions). We DO recommend to use email.
        'name=my_test_job_number_3' - defines (optional) job name
        'skipPDB=on' - possible values are: on and off. If on - PDB check will not be performed - this is default for JPred API (see JPred documentation for more details on PDB check). Since default is defined, parameter is optional.
-
-    NOTE:
+    
+    NOTE: 
        order of parameters is not important, optional parameters could be left out.
-    NOTE:
+    NOTE: 
        adding the word 'silent' to the command line will suppress all but essential output, e.g.:
        'perl jpredapi submit file=filename mode=batch format=fasta email=name\@domain.com name=my_test_job skipPDB=on silent'
-
-  2.1
+  
+  2.1 
     Check submission_all_types_example.csh script file provided for further examples.
 
   2.2
     Check *.example files for example of inputs in all valid combinations of mode/format: batch_fasta.example, msa_blc.example, msa_fasta.example, msa_msf.example, single_fasta.example, single_raw.example
 
-  2.2.1
+  2.2.1 
     Valid combinations of mode/format are: mode=single format=raw, mode=single format=fasta, mode=msa format=fasta, mode=msa format=msf, mode=msa format=blc, mode=batch format=fasta
-
+ 
 
   3.
     To check JPred job status do:
@@ -138,7 +138,7 @@ sub doc {
                        NOTE: if using 'checkEvery=once' the program will perform status check just once and exit
        'silent' - adding the word 'silent' to the command line will suppress all but essential output
 
-  3.1
+  3.1      
     Check one_job_retrieval.csh script file provided. One can use it to retrieve JPred job results like so:
        'source one_job_retrieval.csh jobId' - where jobId is the JPred job id returned at submission (id looks like: jp_OpHCA0J)
 
@@ -146,7 +146,7 @@ sub doc {
   4.
     To check how many jobs you have already submitted on a given day (out of 1000 maximum allowed jobs per user per day) do:
         'perl jpredapi quota email=name\@domain.com'
-    where:
+    where: 
 	'email=name\@domain.com' - defines email address you use for job submissions
 
   5.
@@ -161,11 +161,11 @@ END
 
 my $silent = 0;
 subcommand 'submit' => sub {
-    my ($file,$mode,$format,$skipPDB,$email,$name,$seq) = ('defaultNotDefined','defaultNotDefined','defaultNotDefined','on','defaultNotDefined','defaultNotDefined','defaultNotDefined');
+    my ($file,$mode,$format,$skipPDB,$email,$name,$seq) = ('defaultNotDefined','defaultNotDefined','defaultNotDefined','on','defaultNotDefined','defaultNotDefined','defaultNotDefined'); 
     my $paramsLine = '';
     my $delim = '£€£€';
     my $n = scalar @ARGV;
-
+    
     my $formatUser;
     for (my $i=0; $i<$n; $i++) {
 	my $a = $ARGV[$i];
@@ -178,17 +178,17 @@ subcommand 'submit' => sub {
 	    if ($key eq 'skipPDB') {$skipPDB = $val; $paramsLine = $paramsLine.$a.$delim;}
 	    if ($key eq 'email') {$email = $val; $paramsLine = $paramsLine.$a.$delim;}
 	    if ($key eq 'name') {$name = $val; $paramsLine = $paramsLine.$a.$delim;}
-	    if ($key eq 'seq') {$seq = $val;}
+	    if ($key eq 'seq') {$seq = $val;}	    
 	}
 	if ($a eq 'silent') {$silent=1;}
-    }
+    }     
     if (!($paramsLine =~ /skipPDB/)){$paramsLine = $paramsLine.'skipPDB='.$skipPDB.$delim;}
-    if ( ($formatUser eq 'raw' && $mode eq 'single')
-	 || ($formatUser eq 'fasta' && $mode eq 'single')
-	 || ($formatUser eq 'fasta' && $mode eq 'msa')
-	 || ($formatUser eq 'msf' && $mode eq 'msa')
-	 || ($formatUser eq 'blc' && $mode eq 'msa')
-	 || ($formatUser eq 'fasta' && $mode eq 'batch')
+    if ( ($formatUser eq 'raw' && $mode eq 'single') 
+	 || ($formatUser eq 'fasta' && $mode eq 'single') 
+	 || ($formatUser eq 'fasta' && $mode eq 'msa') 
+	 || ($formatUser eq 'msf' && $mode eq 'msa') 
+	 || ($formatUser eq 'blc' && $mode eq 'msa') 
+	 || ($formatUser eq 'fasta' && $mode eq 'batch') 
 	) {
 	if ($formatUser eq 'raw' && $mode eq 'single') {$format = 'seq';}
 	if ($formatUser eq 'fasta' && $mode eq 'single') {$format = 'seq';}
@@ -223,7 +223,7 @@ subcommand 'submit' => sub {
     if ( !($skipPDB eq 'on' || $skipPDB eq 'off') ) {
 	print "ERROR: skipPDB parameter values could only be 'on' (skip PDB check, default) or 'off' (perform PDB check). Exiting.\n";
 	exit();
-    }
+    } 
     if ( !($name =~ /^\w+$/) ) {
 	print "ERROR: name parameter could only be built from Latin characters, numbers, and '_' symbol. Exiting.\n";
 	exit();
@@ -255,14 +255,14 @@ subcommand 'submit' => sub {
 
     #print "RESOURCE:\n$resource\n";
 
-    my $response = $ua->request(POST HOST.'/job',
+    my $response = $ua->request(POST HOST.'/job', 
 				'Content-Type' => 'text/txt',
 				Content        => $resource
 	);
     # On success
     if ($response->is_success) {
 	if ($format ne 'batch') {
-	    my $url;
+	    my $url;	
 	    $url = $response->header('Location');
 	    my ($id) = $url =~ /(jp_.*)$/;
 	    if ($id) {
@@ -279,7 +279,7 @@ subcommand 'submit' => sub {
 		print $response->content;
 		print "\n\n";
 	    }
-	}
+	} 
 	if ($format eq 'batch') {
 	    my $message = $response->content;# =~ m{<h1>([^<]+)</h1>};
 	    $message =~ s/^<h1>\s+|<\/h1>$//g;
@@ -302,7 +302,7 @@ subcommand 'submit' => sub {
 subcommand 'status' => sub {
     my ($id,$interval,$getResults,$silent) = ('defaultNotDefined',60,'yes',0);
     my $n = scalar @ARGV;
-
+        
     for (my $i=0; $i<$n; $i++) {
 	my $a = $ARGV[$i];
 	if ($a =~ /^(.*)=(.*)$/) {
@@ -313,7 +313,7 @@ subcommand 'status' => sub {
 	    if ($key eq 'checkEvery') {$interval = $val;}
 	}
 	if ($a eq 'silent') {$silent=1;}
-    }
+    }     
 
     if (!$silent) {
 	print "Your job status will be checked with the following parameters:\n";
@@ -379,8 +379,8 @@ subcommand 'quota' => sub {
 	    my $val=$2;
 	    if ($key eq 'email') {$email = $val;}
 	}
-    }
-
+    }     
+    
     my $response = $ua->request(GET HOST.'/quota/'.$email);
     if ($response->is_success) {
 	print $response->content;
@@ -400,3 +400,4 @@ subcommand 'sectonewday' => sub {
         print $response->content;
     }
 };
+

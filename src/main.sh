@@ -66,26 +66,26 @@ The job might take a few minutes (or a few hours), so have a coffee and come bac
 filename=$(basename $1)
 if [ ${#OUTDIR} -eq 0 ]; then OUTDIR=$(dirname $0)/../${filename%.*}_output; fi
 mkdir $OUTDIR
-# cat $1 | grep ">" | sed 's%>%%' | sed 's%.fasta%%' | sed 's%:%_%' | awk '{print $1}' > $OUTDIR/names
-#
-# ############# Splits big files into smaller files #############
-#
-# echo ...Splitting your big fasta file...
-# if [ $(cat $OUTDIR/names | wc -l) -gt 99 ]; then
-#   mkdir ${filename%.*}_split
-#   split -l 98 $1
-#   for f in $(ls x*); do mv $f ${filename%.*}_split/. ; done
-# fi
-#
-# ############# Split multiline fasta file into single sequence files #############
-#
-# FOLDER="${filename%.*}_single"
-# rm -rf $FOLDER
-# mkdir $FOLDER
-# pyfasta split --header "$FOLDER/%(seqid)s.fasta" $FILE;
-# rm -rf **/*.flat *.flat **/*.gdx *.gdx # Remove useless files
-# echo "Results saved in $FOLDER directory."
-#
+cat $1 | grep ">" | sed 's%>%%' | sed 's%.fasta%%' | sed 's%:%_%' | awk '{print $1}' > $OUTDIR/names
+
+############# Splits big files into smaller files #############
+
+echo ...Splitting your big fasta file...
+if [ $(cat $OUTDIR/names | wc -l) -gt 99 ]; then
+  mkdir ${filename%.*}_split
+  split -l 98 $1
+  for f in $(ls x*); do mv $f ${filename%.*}_split/. ; done
+fi
+
+############# Split multiline fasta file into single sequence files #############
+
+FOLDER="${filename%.*}_single"
+rm -rf $FOLDER
+mkdir $FOLDER
+pyfasta split --header "$FOLDER/%(seqid)s.fasta" $FILE;
+rm -rf **/*.flat *.flat **/*.gdx *.gdx # Remove useless files
+echo "Results saved in $FOLDER directory."
+
 # ############# Protein content analysis with ProtParam #############
 #
 # echo "...Analyzing your protein sequences..."
@@ -95,7 +95,7 @@ mkdir $OUTDIR
 # ############# Linear Motif Search  #############
 #
 # echo ...Performing ELM motif search...
-# python $(dirname $0)/motifs.py -m ../data/elm_classes.tsv -i $FILE -o $OUTDIR/Motifs.tsv
+# python $(dirname $0)/motifs.py -m $(dirname $0)/../data/elm_classes.tsv -i $FILE -o $OUTDIR/Motifs.tsv
 # echo "Results saved in $OUTDIR/Motifs.tsv."
 #
 # ############# ANCHOR binding regions prediction #############
@@ -172,9 +172,9 @@ mkdir $OUTDIR
 # echo Cleaning output file...
 # grep -v -E "<|>" $OUTDIR/NetSurfP.txt > tmp && mv tmp $OUTDIR/NetSurfP.txt
 # echo "Results saved in $OUTDIR/NetSurfP.txt"
-
-############# DRNApred for DNA and RNA binding sites #############
-
+#
+# ############ DRNApred for DNA and RNA binding sites #############
+#
 # echo ...Sending data to Biomine DRNApred server...
 # if [ $(cat $OUTDIR/names | wc -l) -gt 99 ]; then
 #   rm -f $OUTDIR/DRNApred.txt
@@ -211,30 +211,34 @@ mkdir $OUTDIR
 #     rm tmp
 #   fi
 # fi
+#
+# # ############# JPred secondary structure prediction #############
+#
+# This one is particularly long and won't work with very short sequences
+echo ...Running JPred API...
+csh bin/jpred.csh $FOLDER $OUTDIR bin/jpredapi;
+echo "Results available in $FOLDER_output folder."
 
-# ############# JPred secondary structure prediction #############
-
-# # This one is particularly long and won't work with very short sequences
-# echo ...Running JPred API...
-# csh bin/jpred.csh $FOLDER $OUTDIR bin/jpredapi;
-# echo "Results available in $FOLDER_output folder."
-
-################################################################################
-#                     RESULTS
-################################################################################
-
-############# Python plots #############
-
-echo "...Analysing results..."
-mkdir $OUTDIR/summary
-python $(dirname $0)/summary.py $OUTDIR
+# ################################################################################
+# #                     RESULTS
+# ################################################################################
+#
+# ############# Python plots #############
+#
+# echo "...Analysing results..."
+# mkdir $OUTDIR/summary
+# python $(dirname $0)/summary.py $OUTDIR
 
 ############# Update database and generate summary files #############
 
 echo "...Adding results to SQLite database and generating html file..."
 sql=$(dirname $0)/../sqlite
-python $sql/main.py -d $OUTDIR -o $OUTDIR/sEP_table2.csv -f csv -db $sql/spepDB.db -t spep
-python $sql/main.py -o $OUTDIR/sEP_table2.html -f html -db $sql/spepDB.db -t spep
+current=$(pwd)
+cd $OUTDIR
+ABSPATH=$(pwd)
+cd $current
+python $sql/main.py -d $ABSPATH -o $OUTDIR/sEP_table.csv -f csv -db $sql/spepDB.db -t spep
+python $sql/main.py -o $OUTDIR/sEP_table.html -f html -db $sql/spepDB.db -t spep
 echo "Done. You can find a html table with all results summarized :)"
 
 ############# R plots #############

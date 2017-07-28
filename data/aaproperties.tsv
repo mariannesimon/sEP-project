@@ -1,0 +1,21 @@
+Name,3symbol,1symbol,class,polarity,charge,hydropathy,mw,frequency
+Alanine,Ala,A,aliphatic,nonpolar,N,Hydrophobic,89.094,7.63
+Cysteine,Cys,C,sulfur-containing,nonpolar,N,Moderate,121.154,1.76
+Glutamic acid,Glu,E,acid,acidic polar,-,Hydrophilic,147.131,6.42
+Aspartic acid,Asp,D,acid,acidic polar,-,Hydrophilic,133.104,5.40
+Glycine,Gly,G,aliphatic,nonpolar,N,Hydrophobic,75.067,6.33
+Phenylalanine,Phe,F,aromatic,nonpolar,N,Hydrophobic,165.192,3.87
+Isoleucine,Ile,I,aliphatic,nonpolar,N,Hydrophobic,131.175,5.10
+Histidine,His,H,basic aromatic,basic polar,+,Moderate,155.156,2.44
+Lysine,Lys,K,basic,basic polar,+,Hydrophilic,146.189,5.64
+Methionine,Met,M,sulfur-containing,nonpolar,N,Moderate,149.208,2.25
+Leucine,Leu,L,aliphatic,nonpolar,N,Hydrophobic,131.175,9.29
+Asparagine,Asn,N,amide,polar,N,Hydrophilic,132.119,4.28
+Glutamine,Gln,Q,amide,polar,N,Hydrophilic,146.146,4.21
+Proline,Pro,P,cyclic,nonpolar,N,Hydrophobic,115.132,5.41
+Serine,Ser,S,hydroxyl-containing,polar,N,Hydrophilic,105.093,8.34
+Arginine,Arg,R,basic,basic polar,+,Hydrophilic,174.203,5.71
+Threonine,Thr,T,hydroxyl-containing,polar,N,Hydrophilic,119.119,5.56
+Tryptophan,Trp,W,aromatic,nonpolar,N,Hydrophobic,204.228,1.24
+Valine,Val,V,aliphatic,nonpolar,N,Hydrophobic,117.148,6.20
+Tyrosine,Tyr,Y,aromatic,polar,N,Hydrophobic,181.191,2.87
